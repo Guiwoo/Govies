@@ -1,10 +1,13 @@
 import AppLoading from "expo-app-loading";
 import React from "react";
 import * as Font from "expo-font";
-import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Asset, useAssets } from "expo-asset";
-import { Image } from "react-native";
+import { useAssets } from "expo-asset";
+import { NavigationContainer } from "@react-navigation/native";
+import RootNav from "./navigation/Root";
+import useColorScheme from "react-native/Libraries/Utilities/useColorScheme";
+import { ThemeProvider } from "styled-components";
+import { darkTheme, lightTheme } from "./styled";
 
 // const loadFonts = (fonts) => fonts.map((font) => Font.loadAsync(font));
 // const loadImages = (images) =>
@@ -18,9 +21,16 @@ import { Image } from "react-native";
 
 export default function App() {
   const [assets] = useAssets([require("./assets/somiFace.jpg")]);
-  const [loaded] = Font.useFonts([Ionicons.font]);
+  const [loaded] = Font.useFonts(Ionicons.font);
+  const isDark = useColorScheme() === "dark";
   if (!assets || !loaded) {
     return <AppLoading />;
   }
-  return null;
+  return (
+    <ThemeProvider theme={lightTheme}>
+      <NavigationContainer>
+        <RootNav />
+      </NavigationContainer>
+    </ThemeProvider>
+  );
 }
