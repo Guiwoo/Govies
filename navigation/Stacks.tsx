@@ -1,20 +1,30 @@
 import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import { Text, TouchableOpacity, View } from "react-native";
+import { ParamListBase } from "@react-navigation/routers";
 
 const Stack = createNativeStackNavigator();
 
-const ScOne = ({ navigation: { navigate } }) => (
+const ScOne: React.FC<NativeStackScreenProps<ParamListBase, "One">> = ({
+  navigation: { navigate },
+}) => (
   <TouchableOpacity onPress={() => navigate("Two")}>
     <Text>One</Text>
   </TouchableOpacity>
 );
-const ScTwo = ({ navigation: { navigate } }) => (
+const ScTwo: React.FC<NativeStackScreenProps<ParamListBase, "Two">> = ({
+  navigation: { navigate },
+}) => (
   <TouchableOpacity onPress={() => navigate("Three")}>
     <Text>Two</Text>
   </TouchableOpacity>
 );
-const ScThree = ({ navigation: { navigate } }) => (
+const ScThree: React.FC<NativeStackScreenProps<ParamListBase, "Three">> = ({
+  navigation: { navigate },
+}) => (
   <TouchableOpacity onPress={() => navigate("One")}>
     <Text>Three</Text>
   </TouchableOpacity>
