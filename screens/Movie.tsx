@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { makeImgPath } from "../utils";
 import { BlurView } from "expo-blur";
+import Slide from "../components/Slide";
 
 const API_KEY = "2384348b5a6b3811901d3b50c7882207";
 
@@ -22,52 +23,9 @@ const Loader = styled.View`
   align-items: center;
 `;
 
-const Box = styled.View`
-  flex: 1;
-`;
-
-const BgImg = styled.Image``;
-
-const Title = styled.Text<{ isDark: boolean }>`
-  font-size: 16px;
-  font-weight: 600;
-  color: ${(props) => (props.isDark ? "white" : props.theme.textColor)};
-`;
-
-const Poster = styled.Image`
-  width: 100px;
-  height: 160px;
-  border-radius: 5px;
-`;
-
-const Wrapper = styled.View`
-  flex-direction: row;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-`;
-
-const Column = styled.View`
-  width: 40%;
-  margin-left: 15px;
-`;
-
-const OverView = styled.Text<{ isDark: boolean }>`
-  margin-top: 10px;
-  color: ${(props) =>
-    props.isDark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)"};
-`;
-
-const Votes = styled(OverView)<{ isDark: boolean }>`
-  color: ${(props) =>
-    props.isDark ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)"};
-  font-size: 12px;
-`;
-
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 //navigate("Navigator which i want to move", {screen:"Which i want to move scrren in Navigator"})
 const Movies: React.FC = () => {
-  const isDark = useColorScheme() === "dark";
   const [loading, setLoading] = useState(true);
   const [nowPlaying, setNowPlaying] = useState([]);
   const getNowPlaying = async () => {
@@ -100,30 +58,14 @@ const Movies: React.FC = () => {
         showsPagination={false}
       >
         {nowPlaying?.map((m) => (
-          <Box key={m.id}>
-            <BgImg
-              style={StyleSheet.absoluteFill}
-              source={{ uri: makeImgPath(m.backdrop_path) }}
-            />
-            <BlurView
-              tint={isDark ? "dark" : "light"}
-              intensity={70}
-              style={StyleSheet.absoluteFill}
-            >
-              <Wrapper>
-                <Poster source={{ uri: makeImgPath(m.poster_path) }} />
-                <Column>
-                  <Title isDark={isDark}>{m.original_title}</Title>
-                  {m.vote_average > 0 ? (
-                    <Votes isDark={isDark}>⭐️ {m.vote_average}/10</Votes>
-                  ) : null}
-                  <OverView isDark={isDark}>
-                    {m.overview.slice(0, 100)}...
-                  </OverView>
-                </Column>
-              </Wrapper>
-            </BlurView>
-          </Box>
+          <Slide
+            key={m.id}
+            backdrop_path={m.backdrop_path}
+            poster_path={m.poster_path}
+            original_title={m.original_title}
+            vote_average={m.vote_average}
+            overview={m.overview}
+          />
         ))}
       </Swiper>
     </Container>
