@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import styled from "styled-components/native";
 import { makeImgPath } from "../utils";
-import Poster from "./Poser";
+import Poster from "./Poster";
 
 const Title = styled.Text<{ isDark: boolean }>`
   font-size: 16px;

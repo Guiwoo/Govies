@@ -8,16 +8,9 @@ import RootNav from "./navigation/Root";
 import useColorScheme from "react-native/Libraries/Utilities/useColorScheme";
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "./styled";
+import { QueryClient, QueryClientProvider } from "react-query";
 
-// const loadFonts = (fonts) => fonts.map((font) => Font.loadAsync(font));
-// const loadImages = (images) =>
-//   images.map((image) => {
-//     if (typeof image === "string") {
-//       return Image.prefetch(image);
-//       //on the web await Image.petch()
-//     }
-//     return Asset.loadAsync(image);
-//   });
+const queryClient = new QueryClient();
 
 export default function App() {
   const [assets] = useAssets([require("./assets/somiFace.jpg")]);
@@ -27,10 +20,12 @@ export default function App() {
     return <AppLoading />;
   }
   return (
-    <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
-      <NavigationContainer>
-        <RootNav />
-      </NavigationContainer>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+        <NavigationContainer>
+          <RootNav />
+        </NavigationContainer>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
