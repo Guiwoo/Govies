@@ -34,7 +34,7 @@ const Title = styled.Text`
 `;
 
 interface HMediaProps {
-  posterPath: string;
+  posterPath: string | null;
   originalTitle: string;
   overview: string;
   releaseDate?: string;
@@ -50,7 +50,7 @@ const HMedia: React.FC<HMediaProps> = ({
 }) => {
   return (
     <HMovie>
-      <Poster path={posterPath} />
+      <Poster path={posterPath || ""} />
       <HColumn>
         <Title>
           {originalTitle.length > 30

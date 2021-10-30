@@ -9,3 +9,8 @@ return Image.prefetch(image);
 }
 return Asset.loadAsync(image);
 });
+
+## React Query amazing
+
+https://react-query.tanstack.com
+queryclient can manage all things

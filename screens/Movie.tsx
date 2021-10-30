@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components/native";
 import Swiper from "react-native-swiper";
-import { ActivityIndicator, Dimensions, View } from "react-native";
+import { ActivityIndicator, Dimensions, ListRenderItem } from "react-native";
 import Slide from "../components/Slide";
 import HMedia from "../components/HMedia";
 import VMedia from "../components/VMedia";
-import { useQuery } from "react-query";
-import { moviesApi } from "../api";
+import { useQuery, useQueryClient } from "react-query";
+import { Movie, MovieResponse, moviesApi } from "../api";
 
 const Container = styled.FlatList`
   background-color: ${(props) => props.theme.mainBg};
@@ -38,47 +38,41 @@ const VSeperator = styled.View`
 const HSeperator = styled.View`
   height: 20px;
 `;
-const movieKeyExtractor = (item) => item.id + "";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 //navigate("Navigator which i want to move", {screen:"Which i want to move scrren in Navigator"})
 const Movies: React.FC = () => {
-  const [refreshing, setRefreshing] = useState(false);
-  const { isLoading: nowPlayingLoading, data: nowPlayingData } = useQuery(
-    "nowPlaying",
-    moviesApi.nowPlaying
-  );
-  const { isLoading: upcomingLoading, data: upcomingData } = useQuery(
-    "upcoming",
-    moviesApi.upcoming
-  );
-  const { isLoading: trendingLoading, data: trendingData } = useQuery(
-    "trending",
-    moviesApi.trending
-  );
+  const queryClient = useQueryClient();
+  const {
+    isLoading: nowPlayingLoading,
+    data: nowPlayingData,
+    isRefetching: isRefetchingNow,
+  } = useQuery<MovieResponse>(["movies", "nowPlaying"], moviesApi.nowPlaying);
+  const {
+    isLoading: upcomingLoading,
+    data: upcomingData,
+    isRefetching: isRefetchingUp,
+  } = useQuery<MovieResponse>(["movies", "upcoming"], moviesApi.upcoming);
+  const {
+    isLoading: trendingLoading,
+    data: trendingData,
+    isRefetching: isRefetchingTrend,
+  } = useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
 
-  const renderVMedia = ({ item }) => (
-    <VMedia
-      posterPath={item.poster_path}
-      originalTitle={item.original_title}
-      voteAverage={item.vote_average}
-    />
-  );
-  const renderHMedia = ({ item }) => (
-    <HMedia
-      posterPath={item.poster_path}
-      originalTitle={item.original_title}
-      overview={item.overview}
-      releaseDate={item.release_date}
-    />
-  );
+  const onRefresh = async () => {
+    queryClient.refetchQueries(["movies"]);
+  };
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
+  const refreshing = isRefetchingNow || isRefetchingUp || isRefetchingTrend;
+  // console.log(Object.values(nowPlayingData.results[0]).map((v) => typeof v));
   return loading ? (
     <Loader>
       <ActivityIndicator size="large" />
     </Loader>
-  ) : (
+  ) : upcomingData ? (
     <Container
+      onRefresh={onRefresh}
+      refreshing={refreshing}
       ListHeaderComponent={
         <>
           <Swiper
@@ -97,35 +91,50 @@ const Movies: React.FC = () => {
             {nowPlayingData?.results.map((m) => (
               <Slide
                 key={m.id}
-                backdrop_path={m.backdrop_path}
-                poster_path={m.poster_path}
+                backdrop_path={m.backdrop_path || ""}
+                poster_path={m.poster_path || ""}
                 original_title={m.original_title}
                 vote_average={m.vote_average}
                 overview={m.overview}
               />
             ))}
           </Swiper>
-          <ListContainer>
-            <ListTitle>Trending Movies</ListTitle>
-            <TrendingScroll
-              ItemSeparatorComponent={VSeperator}
-              contentContainerStyle={{ paddingHorizontal: 20 }}
-              data={trendingData.results}
-              horizontal
-              keyExtractor={movieKeyExtractor}
-              showsHorizontalScrollIndicator={false}
-              renderItem={renderVMedia}
-            />
-          </ListContainer>
+          {trendingData ? (
+            <ListContainer>
+              <ListTitle>Trending Movies</ListTitle>
+              <TrendingScroll
+                ItemSeparatorComponent={VSeperator}
+                contentContainerStyle={{ paddingHorizontal: 20 }}
+                data={trendingData?.results}
+                horizontal
+                keyExtractor={(item) => item.id + ""}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <VMedia
+                    posterPath={item.poster_path}
+                    originalTitle={item.original_title}
+                    voteAverage={item.vote_average}
+                  />
+                )}
+              />
+            </ListContainer>
+          ) : null}
           <ComingSoonTitle>Coming Soon</ComingSoonTitle>
         </>
       }
-      data={upcomingData.results}
-      keyExtractor={movieKeyExtractor}
+      data={upcomingData?.results}
+      keyExtractor={(item) => item.id + ""}
       ItemSeparatorComponent={HSeperator}
-      renderItem={renderHMedia}
+      renderItem={({ item }) => (
+        <HMedia
+          posterPath={item.poster_path}
+          originalTitle={item.original_title}
+          overview={item.overview}
+          releaseDate={item.release_date}
+        />
+      )}
     />
-  );
+  ) : null;
 };
 
 export default Movies;
