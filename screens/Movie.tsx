@@ -7,16 +7,12 @@ import HMedia from "../components/HMedia";
 import VMedia from "../components/VMedia";
 import { useQuery, useQueryClient } from "react-query";
 import { Movie, MovieResponse, moviesApi } from "../api";
+import Loader from "../components/Loader";
 
 const Container = styled.FlatList`
   background-color: ${(props) => props.theme.mainBg};
 `;
 
-const Loader = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-`;
 const ListTitle = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-size: 18px;
@@ -66,9 +62,7 @@ const Movies: React.FC = () => {
   const refreshing = isRefetchingNow || isRefetchingUp || isRefetchingTrend;
   // console.log(Object.values(nowPlayingData.results[0]).map((v) => typeof v));
   return loading ? (
-    <Loader>
-      <ActivityIndicator size="large" />
-    </Loader>
+    <Loader />
   ) : upcomingData ? (
     <Container
       onRefresh={onRefresh}
