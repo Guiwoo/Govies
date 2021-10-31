@@ -1,17 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components/native";
 import Swiper from "react-native-swiper";
-import { ActivityIndicator, Dimensions, ListRenderItem } from "react-native";
+import { Dimensions } from "react-native";
 import Slide from "../components/Slide";
 import HMedia from "../components/HMedia";
 import VMedia from "../components/VMedia";
 import { useQuery, useQueryClient } from "react-query";
 import { Movie, MovieResponse, moviesApi } from "../api";
 import Loader from "../components/Loader";
+import { FlatList } from "react-native";
+import HList from "../components/HList";
 
 const Container = styled.FlatList`
   background-color: ${(props) => props.theme.mainBg};
-`;
+  color: ${(props) => props.theme.textColor};
+` as unknown as typeof FlatList;
 
 const ListTitle = styled.Text`
   color: ${(props) => props.theme.textColor};
@@ -19,17 +22,8 @@ const ListTitle = styled.Text`
   font-weight: 600;
   margin-left: 20px;
 `;
-const TrendingScroll = styled.FlatList`
-  margin-top: 20px;
-`;
-const ListContainer = styled.View`
-  margin-bottom: 30px;
-`;
 const ComingSoonTitle = styled(ListTitle)`
   margin-bottom: 30px;
-`;
-const VSeperator = styled.View`
-  width: 20px;
 `;
 const HSeperator = styled.View`
   height: 20px;
@@ -37,30 +31,25 @@ const HSeperator = styled.View`
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 //navigate("Navigator which i want to move", {screen:"Which i want to move scrren in Navigator"})
-const Movies: React.FC = () => {
+const Movies = () => {
   const queryClient = useQueryClient();
-  const {
-    isLoading: nowPlayingLoading,
-    data: nowPlayingData,
-    isRefetching: isRefetchingNow,
-  } = useQuery<MovieResponse>(["movies", "nowPlaying"], moviesApi.nowPlaying);
-  const {
-    isLoading: upcomingLoading,
-    data: upcomingData,
-    isRefetching: isRefetchingUp,
-  } = useQuery<MovieResponse>(["movies", "upcoming"], moviesApi.upcoming);
-  const {
-    isLoading: trendingLoading,
-    data: trendingData,
-    isRefetching: isRefetchingTrend,
-  } = useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
+  const [refreshing, setRefreshing] = useState(false);
+  const { isLoading: nowPlayingLoading, data: nowPlayingData } =
+    useQuery<MovieResponse>(["movies", "nowPlaying"], moviesApi.nowPlaying);
+  const { isLoading: upcomingLoading, data: upcomingData } =
+    useQuery<MovieResponse>(["movies", "upcoming"], moviesApi.upcoming);
+  const { isLoading: trendingLoading, data: trendingData } =
+    useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
 
   const onRefresh = async () => {
-    queryClient.refetchQueries(["movies"]);
+    setRefreshing(true);
+    await queryClient.refetchQueries(["movies"]);
+    setRefreshing(false);
   };
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
-  const refreshing = isRefetchingNow || isRefetchingUp || isRefetchingTrend;
   // console.log(Object.values(nowPlayingData.results[0]).map((v) => typeof v));
+  const trackingKey = (item: Movie) => item.id + "";
+
   return loading ? (
     <Loader />
   ) : upcomingData ? (
@@ -94,24 +83,7 @@ const Movies: React.FC = () => {
             ))}
           </Swiper>
           {trendingData ? (
-            <ListContainer>
-              <ListTitle>Trending Movies</ListTitle>
-              <TrendingScroll
-                ItemSeparatorComponent={VSeperator}
-                contentContainerStyle={{ paddingHorizontal: 20 }}
-                data={trendingData?.results}
-                horizontal
-                keyExtractor={(item) => item.id + ""}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ item }) => (
-                  <VMedia
-                    posterPath={item.poster_path}
-                    originalTitle={item.original_title}
-                    voteAverage={item.vote_average}
-                  />
-                )}
-              />
-            </ListContainer>
+            <HList title="Trending Movie" data={trendingData?.results} />
           ) : null}
           <ComingSoonTitle>Coming Soon</ComingSoonTitle>
         </>

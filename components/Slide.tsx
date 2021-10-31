@@ -21,8 +21,8 @@ const Wrapper = styled.View`
 `;
 
 const Column = styled.View`
-  width: 40%;
-  margin-left: 15px;
+  width: 45%;
+  margin-left: 30px;
 `;
 
 const OverView = styled.Text<{ isDark: boolean }>`

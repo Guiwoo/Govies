@@ -14,13 +14,13 @@ const HColumn = styled.View`
 `;
 
 const Overview = styled.Text`
-  color: white;
+  color: ${(props) => props.theme.textColor};
   opacity: 0.8;
   width: 80%;
 `;
 
 const Release = styled.Text`
-  color: white;
+  color: ${(props) => props.theme.textColor};
   font-size: 12px;
   margin-vertical: 10px;
   font-weight: 500;
@@ -28,7 +28,7 @@ const Release = styled.Text`
 `;
 
 const Title = styled.Text`
-  color: white;
+  color: ${(props) => props.theme.textColor};
   font-weight: 600;
   margin-top: 7px;
 `;

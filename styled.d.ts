@@ -5,5 +5,6 @@ declare module "styled-components" {
   export interface DefaultTheme {
     mainBg: string;
     textColor: string;
+    searchColor: string;
   }
 }
