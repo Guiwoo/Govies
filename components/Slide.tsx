@@ -1,6 +1,8 @@
+import { useNavigation } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
 import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import styled from "styled-components/native";
 import { makeImgPath } from "../utils";
 import Poster from "./Poster";
@@ -53,6 +55,8 @@ const Slide: React.FC<SlideProps> = ({
   overview,
 }) => {
   const isDark = useColorScheme() === "dark";
+  const navigation = useNavigation();
+  const goDetail = () => navigation.navigate("Stack", { screen: "Detail" });
   return (
     <View style={{ flex: 1 }}>
       <BgImg
@@ -64,16 +68,18 @@ const Slide: React.FC<SlideProps> = ({
         intensity={70}
         style={StyleSheet.absoluteFill}
       >
-        <Wrapper>
-          <Poster path={poster_path} />
-          <Column>
-            <Title isDark={isDark}>{original_title}</Title>
-            {vote_average > 0 ? (
-              <Votes isDark={isDark}>⭐️ {vote_average}/10</Votes>
-            ) : null}
-            <OverView isDark={isDark}>{overview.slice(0, 100)}...</OverView>
-          </Column>
-        </Wrapper>
+        <TouchableOpacity onPress={goDetail}>
+          <Wrapper>
+            <Poster path={poster_path} />
+            <Column>
+              <Title isDark={isDark}>{original_title}</Title>
+              {vote_average > 0 ? (
+                <Votes isDark={isDark}>⭐️ {vote_average}/10</Votes>
+              ) : null}
+              <OverView isDark={isDark}>{overview.slice(0, 100)}...</OverView>
+            </Column>
+          </Wrapper>
+        </TouchableOpacity>
       </BlurView>
     </View>
   );
