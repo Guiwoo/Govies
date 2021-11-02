@@ -1,9 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import React from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import styled from "styled-components/native";
+import { Movie } from "../api";
 import { makeImgPath } from "../utils";
 import Poster from "./Poster";
 
@@ -40,28 +42,36 @@ const Votes = styled(OverView)<{ isDark: boolean }>`
 `;
 
 interface SlideProps {
-  backdrop_path: string;
-  poster_path: string;
-  original_title: string;
-  vote_average: number;
+  backdropPath: string;
+  posterPath: string;
+  originalTitle: string;
+  voteaverage: number;
   overview: string;
+  fullData: Movie;
 }
 
 const Slide: React.FC<SlideProps> = ({
-  backdrop_path,
-  poster_path,
-  original_title,
-  vote_average,
+  backdropPath,
+  posterPath,
+  originalTitle,
+  voteaverage,
   overview,
+  fullData,
 }) => {
   const isDark = useColorScheme() === "dark";
-  const navigation = useNavigation();
-  const goDetail = () => navigation.navigate("Stack", { screen: "Detail" });
+  const navigation = useNavigation<NativeStackNavigationProp<any, any>>();
+  const goDetail = () =>
+    navigation.navigate("Stack", {
+      screen: "Detail",
+      params: {
+        ...fullData,
+      },
+    });
   return (
     <View style={{ flex: 1 }}>
       <BgImg
         style={StyleSheet.absoluteFill}
-        source={{ uri: makeImgPath(backdrop_path) }}
+        source={{ uri: makeImgPath(backdropPath) }}
       />
       <BlurView
         tint={isDark ? "dark" : "light"}
@@ -70,11 +80,11 @@ const Slide: React.FC<SlideProps> = ({
       >
         <TouchableOpacity onPress={goDetail}>
           <Wrapper>
-            <Poster path={poster_path} />
+            <Poster path={posterPath} />
             <Column>
-              <Title isDark={isDark}>{original_title}</Title>
-              {vote_average > 0 ? (
-                <Votes isDark={isDark}>⭐️ {vote_average}/10</Votes>
+              <Title isDark={isDark}>{originalTitle}</Title>
+              {voteaverage > 0 ? (
+                <Votes isDark={isDark}>⭐️ {voteaverage}/10</Votes>
               ) : null}
               <OverView isDark={isDark}>{overview.slice(0, 100)}...</OverView>
             </Column>

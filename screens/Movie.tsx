@@ -4,7 +4,6 @@ import Swiper from "react-native-swiper";
 import { Dimensions } from "react-native";
 import Slide from "../components/Slide";
 import HMedia from "../components/HMedia";
-import VMedia from "../components/VMedia";
 import { useQuery, useQueryClient } from "react-query";
 import { Movie, MovieResponse, moviesApi } from "../api";
 import Loader from "../components/Loader";
@@ -74,11 +73,12 @@ const Movies = () => {
             {nowPlayingData?.results.map((m) => (
               <Slide
                 key={m.id}
-                backdrop_path={m.backdrop_path || ""}
-                poster_path={m.poster_path || ""}
-                original_title={m.original_title}
-                vote_average={m.vote_average}
+                backdropPath={m.backdrop_path || ""}
+                posterPath={m.poster_path || ""}
+                originalTitle={m.original_title}
+                voteaverage={m.vote_average}
                 overview={m.overview}
+                fullData={m}
               />
             ))}
           </Swiper>
@@ -97,6 +97,7 @@ const Movies = () => {
           originalTitle={item.original_title}
           overview={item.overview}
           releaseDate={item.release_date}
+          fullData={item}
         />
       )}
     />

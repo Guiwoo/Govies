@@ -1,7 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import styled from "styled-components/native";
+import { Movie } from "../api";
 import Poster from "./Poster";
 import Votes from "./Votes";
 
@@ -24,9 +26,9 @@ const Overview = styled.Text`
 const Release = styled.Text`
   color: ${(props) => props.theme.textColor};
   font-size: 12px;
-  margin-vertical: 10px;
   font-weight: 500;
   opacity: 0.6;
+  margin-vertical: 10px;
 `;
 
 const Title = styled.Text`
@@ -41,6 +43,7 @@ interface HMediaProps {
   overview: string;
   releaseDate?: string;
   voteAverage?: number;
+  fullData: Movie;
 }
 
 const HMedia: React.FC<HMediaProps> = ({
@@ -49,9 +52,16 @@ const HMedia: React.FC<HMediaProps> = ({
   overview,
   releaseDate,
   voteAverage,
+  fullData,
 }) => {
-  const navigation = useNavigation();
-  const goDetail = () => navigation.navigate("Stack", { screen: "Detail" });
+  const navigation = useNavigation<NativeStackNavigationProp<any, any>>();
+  const goDetail = () =>
+    navigation.navigate("Stack", {
+      screen: "Detail",
+      params: {
+        ...fullData,
+      },
+    });
   return (
     <TouchableOpacity onPress={goDetail}>
       <HMovie>

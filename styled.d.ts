@@ -6,5 +6,6 @@ declare module "styled-components" {
     mainBg: string;
     textColor: string;
     searchColor: string;
+    height:number;
   }
 }

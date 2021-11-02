@@ -36,9 +36,10 @@ const HList: React.FC<HListprops> = ({ title, data }) => (
       keyExtractor={(item) => item.id + ""}
       renderItem={({ item }) => (
         <VMedia
-          posterPath={item.poster_path}
+          posterPath={item.poster_path || ""}
           originalTitle={item.original_name ?? item.original_title}
           voteAverage={item.vote_average}
+          fullData={item}
         />
       )}
     />
