@@ -138,7 +138,7 @@ const Detail: React.FC<DetailScreenProps> = ({
           source={{ uri: makeImgPath(params.backdrop_path || "") }}
         />
         <LinearGradient
-          colors={["transparent", colors.darkGrey]}
+          colors={["transparent", isDark ? colors.darkGrey : colors.lightGrey]}
           style={StyleSheet.absoluteFill}
         />
         <Column>

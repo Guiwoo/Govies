@@ -4,7 +4,7 @@ import Swiper from "react-native-swiper";
 import { Dimensions } from "react-native";
 import Slide from "../components/Slide";
 import HMedia from "../components/HMedia";
-import { useQuery, useQueryClient } from "react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { Movie, MovieResponse, moviesApi } from "../api";
 import Loader from "../components/Loader";
 import { FlatList } from "react-native";
@@ -35,8 +35,17 @@ const Movies = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { isLoading: nowPlayingLoading, data: nowPlayingData } =
     useQuery<MovieResponse>(["movies", "nowPlaying"], moviesApi.nowPlaying);
-  const { isLoading: upcomingLoading, data: upcomingData } =
-    useQuery<MovieResponse>(["movies", "upcoming"], moviesApi.upcoming);
+  const {
+    isLoading: upcomingLoading,
+    data: upcomingData,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery(["movies", "upcoming"], moviesApi.upcoming, {
+    getNextPageParam: (current) => {
+      const nextPage = current.page + 1;
+      return nextPage > current.total_pages ? null : nextPage;
+    },
+  });
   const { isLoading: trendingLoading, data: trendingData } =
     useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
 
@@ -48,11 +57,17 @@ const Movies = () => {
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
   // console.log(Object.values(nowPlayingData.results[0]).map((v) => typeof v));
   const trackingKey = (item: Movie) => item.id + "";
-
+  const loadMore = () => {
+    if (hasNextPage) {
+      fetchNextPage();
+    }
+  };
   return loading ? (
     <Loader />
   ) : upcomingData ? (
     <Container
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.3}
       onRefresh={onRefresh}
       refreshing={refreshing}
       ListHeaderComponent={
@@ -88,7 +103,7 @@ const Movies = () => {
           <ComingSoonTitle>Coming Soon</ComingSoonTitle>
         </>
       }
-      data={upcomingData?.results}
+      data={upcomingData?.pages.map((page) => page.results).flat()}
       keyExtractor={(item) => item.id + ""}
       ItemSeparatorComponent={HSeperator}
       renderItem={({ item }) => (
