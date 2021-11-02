@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
-import { StyleSheet, Linking } from "react-native";
+import { StyleSheet, useColorScheme, Share, Platform } from "react-native";
 import { useQuery } from "react-query";
 import styled from "styled-components/native";
 import { Movie, moviesApi, TV, tvApi } from "../api";
@@ -11,6 +11,7 @@ import Poster from "../components/Poster";
 import { makeImgPath } from "../utils";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const Container = styled.ScrollView`
   background-color: ${(props) => props.theme.mainBg};
@@ -71,9 +72,45 @@ const Detail: React.FC<DetailScreenProps> = ({
   route: { params },
 }) => {
   const isMovie = "original_title" in params;
+  const isDark = useColorScheme() === "dark";
+
   const { isLoading, data } = useQuery(
     [isMovie ? "movies" : "tv", params.id],
     isMovie ? moviesApi.detail : tvApi.detail
+  );
+
+  const shareMedia = async () => {
+    const isAndroid = (Platform.OS = "android");
+    const homepage = isMovie
+      ? `https://www.imdb.com/title/${data.imdb_id}/`
+      : data.homepage;
+    if (isAndroid) {
+      await Share.share({
+        message: `${params.overview}\nCheck it out :${homepage}`,
+        title:
+          "original_title" in params
+            ? params.original_title
+            : params.original_name,
+      });
+    } else {
+      await Share.share({
+        url: homepage,
+        title:
+          "original_title" in params
+            ? params.original_title
+            : params.original_name,
+      });
+    }
+  };
+
+  const ShareButton = () => (
+    <TouchableOpacity onPress={shareMedia}>
+      <Ionicons
+        name="share-outline"
+        size={20}
+        color={isDark ? "white" : "black"}
+      />
+    </TouchableOpacity>
   );
   const openYTLink = async (videoId: string) => {
     const baseUrl = `http://m.youtube.com/watch?v=${videoId}`;
@@ -85,6 +122,14 @@ const Detail: React.FC<DetailScreenProps> = ({
       title: "original_title" in params ? "Movie" : "TV",
     });
   }, []);
+  // header does not re-render the reason why useEffect use twice
+  useEffect(() => {
+    if (data) {
+      setOptions({
+        headerRight: () => <ShareButton />,
+      });
+    }
+  }, [data]);
   return (
     <Container>
       <Header>
