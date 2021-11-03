@@ -9,6 +9,7 @@ import { Movie, MovieResponse, moviesApi } from "../api";
 import Loader from "../components/Loader";
 import { FlatList } from "react-native";
 import HList from "../components/HList";
+import { fetchMore } from "../utils";
 
 const Container = styled.FlatList`
   background-color: ${(props) => props.theme.mainBg};
@@ -38,16 +39,25 @@ const Movies = () => {
   const {
     isLoading: upcomingLoading,
     data: upcomingData,
-    hasNextPage,
-    fetchNextPage,
+    hasNextPage: upcomingHasNext,
+    fetchNextPage: upcomingFetchNext,
   } = useInfiniteQuery(["movies", "upcoming"], moviesApi.upcoming, {
     getNextPageParam: (current) => {
       const nextPage = current.page + 1;
       return nextPage > current.total_pages ? null : nextPage;
     },
   });
-  const { isLoading: trendingLoading, data: trendingData } =
-    useQuery<MovieResponse>(["movies", "trending"], moviesApi.trending);
+  const {
+    isLoading: trendingLoading,
+    data: trendingData,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery(["movies", "trending"], moviesApi.trending, {
+    getNextPageParam: (current) => {
+      const nextPage = current.page + 1;
+      return nextPage > current.total_pages ? null : nextPage;
+    },
+  });
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -57,16 +67,11 @@ const Movies = () => {
   const loading = nowPlayingLoading || upcomingLoading || trendingLoading;
   // console.log(Object.values(nowPlayingData.results[0]).map((v) => typeof v));
   const trackingKey = (item: Movie) => item.id + "";
-  const loadMore = () => {
-    if (hasNextPage) {
-      fetchNextPage();
-    }
-  };
   return loading ? (
     <Loader />
   ) : upcomingData ? (
     <Container
-      onEndReached={loadMore}
+      onEndReached={() => fetchMore(upcomingHasNext, upcomingFetchNext)}
       onEndReachedThreshold={0.3}
       onRefresh={onRefresh}
       refreshing={refreshing}
@@ -98,7 +103,12 @@ const Movies = () => {
             ))}
           </Swiper>
           {trendingData ? (
-            <HList title="Trending Movie" data={trendingData?.results} />
+            <HList
+              title="Trending Movie"
+              data={trendingData?.pages.map((page) => page.results).flat()}
+              hasNext={hasNextPage}
+              fetchNext={fetchNextPage}
+            />
           ) : null}
           <ComingSoonTitle>Coming Soon</ComingSoonTitle>
         </>

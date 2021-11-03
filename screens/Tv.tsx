@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
-import { useQuery, useQueryClient } from "react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "react-query";
 import { tvApi } from "../api";
 import Loader from "../components/Loader";
 import VMedia from "../components/VMedia";
@@ -10,18 +10,40 @@ import { RefreshControl } from "react-native";
 const Tv = () => {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
-  const { isLoading: todayLoading, data: todayData } = useQuery(
-    ["tv", "today"],
-    tvApi.airingToday
-  );
-  const { isLoading: topLoading, data: topData } = useQuery(
-    ["tv", "top"],
-    tvApi.topRated
-  );
-  const { isLoading: trendLoading, data: trendData } = useQuery(
-    ["tv", "trend"],
-    tvApi.trending
-  );
+  const {
+    isLoading: todayLoading,
+    data: todayData,
+    hasNextPage: hasNextToday,
+    fetchNextPage: fetchNextToday,
+  } = useInfiniteQuery(["tv", "today"], tvApi.airingToday, {
+    getNextPageParam(current) {
+      console.log(current);
+      const nextPage = current.page + 1;
+      return nextPage > current.total_pages ? null : nextPage;
+    },
+  });
+  const {
+    isLoading: topLoading,
+    data: topData,
+    hasNextPage: hasNextTop,
+    fetchNextPage: fetchNextTop,
+  } = useInfiniteQuery(["tv", "top"], tvApi.topRated, {
+    getNextPageParam(current) {
+      const nextPage = current.page + 1;
+      return nextPage > current.total_pages ? null : nextPage;
+    },
+  });
+  const {
+    isLoading: trendLoading,
+    data: trendData,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery(["tv", "trend"], tvApi.trending, {
+    getNextPageParam(current) {
+      const nextPage = current.page + 1;
+      return nextPage > current.total_pages ? null : nextPage;
+    },
+  });
   const loading = todayLoading || topLoading || trendLoading;
 
   const onRefresh = async () => {
@@ -38,9 +60,24 @@ const Tv = () => {
       }
       contentContainerStyle={{ paddingVertical: 20 }}
     >
-      <HList title="Trending Tv" data={trendData.results} />
-      <HList title="Airing Today" data={todayData.results} />
-      <HList title="Top Rated Tv" data={topData.results} />
+      <HList
+        title="Trending Tv"
+        data={trendData?.pages.map((page) => page.results).flat()}
+        hasNext={hasNextPage}
+        fetchNext={fetchNextPage}
+      />
+      <HList
+        title="Airing Today"
+        data={todayData?.pages.map((page) => page.results).flat()}
+        hasNext={hasNextToday}
+        fetchNext={fetchNextToday}
+      />
+      <HList
+        title="Top Rated Tv"
+        data={topData?.pages.map((page) => page.results).flat()}
+        hasNext={hasNextTop}
+        fetchNext={fetchNextTop}
+      />
     </ScrollView>
   );
 };
